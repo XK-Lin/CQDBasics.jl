@@ -14,6 +14,8 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Base" => "cqdbase.md",
+        "Data Analysis Base" => "cqddataanalysisbase.md"
     ],
 )
 

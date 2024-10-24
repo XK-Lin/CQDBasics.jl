@@ -19,6 +19,7 @@ simulation = Simulation(
     "off", # θ cross detection
     (0.1, 2e-2), # sigmoid field
     "qm", # R2 comparison
+    ["simulation info", "flip plot", "flip probabilities"] # files to save
 )
 n = 2^8
 Bz = zeros(n)
