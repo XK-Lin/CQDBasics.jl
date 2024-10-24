@@ -673,7 +673,7 @@ function save_results(experiment::Experiment, simulation::Simulation, results::R
     "flip probabilities" ∈ simulation.save_files ? CSV.write(joinpath(folder_dir, "Flip_Probabilities.csv"), DataFrame(results.flip_probabilities[:, :], :auto)) : nothing
     "θₑ plot" ∈ simulation.save_files ? savefig(results.θₑ_plot, joinpath(folder_dir, "θe_Plot.svg")) : nothing
     "θₙ plot" ∈ simulation.save_files ? savefig(results.θₙ_plot, joinpath(folder_dir, "θn_Plot.svg")) : nothing
-    "θₙ θₑ plot" ∈ simulation.save_files ? savefig(results.θₑθₙ_plot, joinpath(folder_dir, "θeθn_Plot.svg")) : nothing
+    "θₑ θₙ plot" ∈ simulation.save_files ? savefig(results.θₑθₙ_plot, joinpath(folder_dir, "θeθn_Plot.svg")) : nothing
     "flip plot" ∈ simulation.save_files ? savefig(results.flip_plot, joinpath(folder_dir, "Flip_Plot.svg")) : nothing
     "CQDBase.jl" ∈ simulation.save_files ? cp(@__FILE__, joinpath(folder_dir, "CQDBase.jl")) : nothing
     end_time = now()
