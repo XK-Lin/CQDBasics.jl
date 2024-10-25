@@ -3,7 +3,7 @@ CQDBase.jl
 
 This module defines important structures and functions for CQD simulations. These can be used for different approaches, including the original CQD simulation with BE, or the Wigner d Majorana simulation with BE.
 Author: Xukun Lin
-Update: 10/24/2024
+Update: 10/25/2024
 
 Required packages: "Pkg", "LinearAlgebra", "Dates", "Statistics", "Logging", "StatsBase", "DifferentialEquations", "ODEInterfaceDiffEq", "Plots", "DataStructures", "DataFrames", "CSV", "LaTeXStrings", "JSON3", "Rotations", "WignerD".
 Required constants: μ₀, γₑ, γₙ, δθ.
@@ -523,7 +523,7 @@ function latex_exponential(x::Real)
     else
         exponent = floor(Int, log10(abs(x)))
         mantissa = x / 10.0^exponent
-        return mantissa == 1 ? "10^{$exponent}" : "$mantissa\\times10{$exponent}"
+        return mantissa == 1 ? "10^{$exponent}" : "$mantissa\\times10^{$exponent}"
     end
 end
 

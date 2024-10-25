@@ -3,7 +3,7 @@ CQDDataAnalysisBase.jl
 
 This module defines functions that analyze results from CQDBase simulations.
 Author: Xukun Lin
-Update: 10/24/2024
+Update: 10/25/2024
 
 Required packages: "JSON3", "Plots", "LaTeXStrings", "DataFrames", "XLSX".
 =#
@@ -116,7 +116,7 @@ function get_kᵢ_plots(directory::String)
         else
             exponent = floor(Int, log10(abs(x)))
             mantissa = x / 10.0^exponent
-            return mantissa == 1 ? "10^{$exponent}" : "$mantissa\\times10{$exponent}"
+            return mantissa == 1 ? "10^{$exponent}" : "$mantissa\\times10^{$exponent}"
         end
     end
     Plots.default(fontfamily="Computer Modern", tickfont=10, linewidth=1.5, framestyle=:box, legendfontsize=9)
