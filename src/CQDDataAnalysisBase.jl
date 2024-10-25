@@ -3,7 +3,7 @@ CQDDataAnalysisBase.jl
 
 This module defines functions that analyze results from CQDBase simulations.
 Author: Xukun Lin
-Update: 10/23/2024
+Update: 10/24/2024
 
 Required packages: "JSON3", "Plots", "LaTeXStrings", "DataFrames", "XLSX".
 =#
@@ -155,7 +155,7 @@ end
 Sort folders in `directory` based on the max R2 value.
 """
 function sort_folders(directory::String)
-    Sys.iswindows() ? error("sort_folders only work on MacOS or Linux.") : nothing
+    Sys.iswindows() ? error("sort_folders only works on MacOS or Linux.") : nothing
     folder_paths = filter(isdir, readdir(directory, join=true))
     max_R2s = []
     for folder_path ∈ folder_paths

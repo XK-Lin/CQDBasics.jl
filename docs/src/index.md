@@ -6,9 +6,13 @@ CurrentModule = CQDBasics
 
 Documentation for [CQDBasics](https://github.com/XK-Lin/CQDBasics.jl).
 
-```@index
+```@contents
 ```
 
 ```@autodocs
 Modules = [CQDBasics]
+```
+
+## Index
+```@index
 ```

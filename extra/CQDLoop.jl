@@ -1,5 +1,4 @@
-include(joinpath(dirname(pwd()), "CQDBasics.jl"))
-using Alert, Dates, .CQDBasics
+using Alert, Dates, CQDBasics
 
 file_dir = pwd()
 
@@ -38,7 +37,6 @@ for i ∈ eachindex(average_method_list)
                                 BₙBₑ_ratio_list[n], # Bₙ Bₑ ratio
                                 kᵢ_list[o], # kᵢ
                                 average_method_list[i], # average method
-                                "off", # θ cross detection
                                 sigmoid_field_list[m], # sigmoid field
                                 "qm", # R2 comparison
                                 ["simulation info", "flip plot", "flip probabilities"], # flies to save

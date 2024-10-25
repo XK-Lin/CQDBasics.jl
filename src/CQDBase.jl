@@ -3,7 +3,7 @@ CQDBase.jl
 
 This module defines important structures and functions for CQD simulations. These can be used for different approaches, including the original CQD simulation with BE, or the Wigner d Majorana simulation with BE.
 Author: Xukun Lin
-Update: 10/23/2024
+Update: 10/24/2024
 
 Required packages: "Pkg", "LinearAlgebra", "Dates", "Statistics", "Logging", "StatsBase", "DifferentialEquations", "ODEInterfaceDiffEq", "Plots", "DataStructures", "DataFrames", "CSV", "LaTeXStrings", "JSON3", "Rotations", "WignerD".
 Required constants: μ₀, γₑ, γₙ, δθ.
@@ -20,9 +20,6 @@ const μ₀ = 4π * 1e-7
 const γₑ = -1.76085963e11
 const γₙ = 1.2500612e7
 const δθ = 1e-6
-
-LinearAlgebra.BLAS.set_num_threads(4)
-Plots.default(fontfamily="Computer Modern", tickfont=10, linewidth=1.5, framestyle=:box, legendfontsize=9)
 
 """
     struct Experiment
@@ -135,7 +132,7 @@ A `Simulation` represents a particular simulation setup.
 - `BₙBₑ_ratio::Tuple{<:Real, <:Real}`: The ratio of the used Bₙ and Bₑ to the theory value.
 - `kᵢ::Real`: The collapse coefficient.
 - `average_method::Union{String, Tuple{String, <:Real}}`: The average method. Choose from `"ABC"` (average angles then branching condition), `"BCA"` (branching conditions averaged), and `"no average"`. If using `"ABC"` or `"BCA"`, the input should be a tuple of length 2, where the second entry is the fraction of total time to be averaged. For example, `average_method = ("ABC", 1/16)`.
-- `θ_cross_detection::Union{String, Tuple{String, <:Real, <:Real}, Tuple{String, <:Real, String}}`: Whether angle cross is automatically detected. Choose from `"off"`, `"sign"`, and `"minabs"`. If using "sign" or "minabs", the input should be a tuple of length 3, where the second entry is the start time for detection, and the third entry is the period for detection. The period may be a fixed value or `"adaptive"`. For example, `θ_cross_detection = ("sign", 10e-6, 4.5e-6)`.
+- `θ_cross_detection::Union{String, Tuple{String, <:Real, <:Real}, Tuple{String, <:Real, String}}` (currently disabled): Whether angle cross is automatically detected. Choose from `"off"`, `"sign"`, and `"minabs"`. If using "sign" or "minabs", the input should be a tuple of length 3, where the second entry is the start time for detection, and the third entry is the period for detection. The period may be a fixed value or `"adaptive"`. For example, `θ_cross_detection = ("sign", 10e-6, 4.5e-6)`.
 - `sigmoid_field::Union{String, Tuple{<:Real, <:Real}}`: Whether use a sigmoid transition field. Give either `"off"` or a tuple of length 2, where the first entry is the magnetic field strength, and the second entry is the y coordinate of the SG apparatus. For example, `sigmoid_field = (0.1, 2e-2)`.
 - `R2_comparison::String`: How to calculate R2. Choose from `"experiment"` and `"qm"`.
 - `save_files::Union{String, Vector{String}}`: Which files to save. Choose from `"θₑ plot"`, `"θₙ plot"`, `"θₑ θₙ plot"`, `"flip plot"`, `"raw data"`, `"flip probabilities"`, `"CQDBase.jl"`, `"simulation info"`, and `"package info"`.
@@ -153,7 +150,7 @@ struct Simulation
     BₙBₑ_ratio::Tuple{<:Real, <:Real}
     kᵢ::Real
     average_method::Union{String, Tuple{String, <:Real}}
-    θ_cross_detection::Union{String, Tuple{String, <:Real, <:Real}, Tuple{String, <:Real, String}}
+    # θ_cross_detection::Union{String, Tuple{String, <:Real, <:Real}, Tuple{String, <:Real, String}}
     sigmoid_field::Union{String, Tuple{<:Real, <:Real}}
     R2_comparison::String
     save_files::Union{String, Vector{String}}
@@ -170,7 +167,7 @@ struct Simulation
         BₙBₑ_ratio::Tuple{<:Real, <:Real},
         kᵢ::Real,
         average_method::Union{String, Tuple{String, <:Real}},
-        θ_cross_detection::Union{String, Tuple{String, <:Real, <:Real}, Tuple{String, <:Real, String}},
+        # θ_cross_detection::Union{String, Tuple{String, <:Real, <:Real}, Tuple{String, <:Real, String}},
         sigmoid_field::Union{String, Tuple{<:Real, <:Real}},
         R2_comparison::String,
         save_files::Union{String, Vector{String}}
@@ -186,7 +183,7 @@ struct Simulation
         BₙBₑ_ratio[2] >= 0 || throw(ArgumentError("The Bₑ ratio must be nonnegative."))
         kᵢ >= 0 || throw(ArgumentError("kᵢ must be nonnegative."))
         (average_method isa String && average_method == "off") || (average_method isa Tuple{String, <:Real} && average_method[1] ∈ ("ABC", "BCA") && 0 < average_method[2] < 1) || throw(ArgumentError("The average method is invalid. See help of `Simulation`."))
-        (θ_cross_detection isa String && θ_cross_detection == "off") || (θ_cross_detection isa Tuple && θ_cross_detection[1] ∈ ("sign", "minabs") && θ_cross_detection[2] > 0 && ((θ_cross_detection[3] isa Real && θ_cross_detection[3] > 0) || (θ_cross_detection[3] isa String && θ_cross_detection[3] == "adaptive"))) || throw(ArgumentError("The θ cross detection is invalid. See help of `Simulation`."))
+        # (θ_cross_detection isa String && θ_cross_detection == "off") || (θ_cross_detection isa Tuple && θ_cross_detection[1] ∈ ("sign", "minabs") && θ_cross_detection[2] > 0 && ((θ_cross_detection[3] isa Real && θ_cross_detection[3] > 0) || (θ_cross_detection[3] isa String && θ_cross_detection[3] == "adaptive"))) || throw(ArgumentError("The θ cross detection is invalid. See help of `Simulation`."))
         (sigmoid_field isa String && sigmoid_field == "off") || (sigmoid_field isa Tuple{<:Real, <:Real} && sigmoid_field[2] >= 0) || throw(ArgumentError("The sigmoid field is invalid. See help of `Simulation`."))
         R2_comparison ∈ ("experiment", "qm") || throw(ArgumentError("The R2 comparison must be either experiment or qm."))
         all(x -> x ∈ ("θₑ plot", "θₙ plot", "θₑ θₙ plot", "flip plot", "raw data", "flip probabilities", "CQDBase.jl", "simulation info", "package info"), save_files) || throw(ArgumentError("The files to save contain invalid names. See help of `Simulation`."))
@@ -207,7 +204,7 @@ struct Simulation
         if ((!θₙ_is_fixed || magnetic_field_computation_method == "exact") && (initial_μₑ, split(initial_μₙ, " ")) ∈ inconsistent_combinations[1]) || (θₙ_is_fixed && magnetic_field_computation_method == "quadrupole" && (initial_μₑ, split(initial_μₙ, " ")) ∈ inconsistent_combinations[2])
             @warn "The initial conditions are inconsistent with CQD postulates."
         end
-        new(type, atom_number, magnetic_field_computation_method, initial_μₑ, initial_μₙ, solver, θₙ_is_fixed, branching_condition, BₙBₑ_strength, BₙBₑ_ratio, kᵢ, average_method, θ_cross_detection, sigmoid_field, R2_comparison, save_files)
+        new(type, atom_number, magnetic_field_computation_method, initial_μₑ, initial_μₙ, solver, θₙ_is_fixed, branching_condition, BₙBₑ_strength, BₙBₑ_ratio, kᵢ, average_method, sigmoid_field, R2_comparison, save_files)
     end
 end
 
@@ -553,6 +550,7 @@ function simulate(experiment::Experiment, simulation::Simulation)
         error("Quadrupole is calculated for zero current. Simulation will be slow and unreliable.")
     end
     raw_data = falses(length(experiment.currents), simulation.atom_number)
+    Plots.default(fontfamily="Computer Modern", tickfont=10, linewidth=1.5, framestyle=:box, legendfontsize=9)
     θₑ_plot, θₙ_plot, θₑθₙ_plot = plot(), plot(), plot()
     for i ∈ eachindex(experiment.currents)
         current_i = experiment.currents[i]
@@ -648,6 +646,7 @@ function Results(experiment::Experiment, simulation::Simulation, raw_data::BitAr
         return flip_probabilities, R2, flip_probabilities_stds
     end
     function plot_flip_probabilities(experiment::Experiment, simulation::Simulation, flip_probabilities, flip_probabilities_stds, R2)
+        Plots.default(fontfamily="Computer Modern", tickfont=10, linewidth=1.5, framestyle=:box, legendfontsize=9)
         flip_plot = plot()
         plot_range = split(experiment.name, " ")[1] == "FS" ? (2:lastindex(experiment.currents)) : (1:lastindex(experiment.currents))
         scatter!(flip_plot, abs.(experiment.currents[plot_range]), experiment.flip_probabilities[plot_range], yerr = experiment.flip_probabilities_stds[plot_range], marker=(:xcross, 6), markerstrokewidth=3, markerstrokecolor=:auto, linewidth=2, label=experiment.name)

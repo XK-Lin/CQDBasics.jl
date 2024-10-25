@@ -5,7 +5,7 @@ t = Template(
     dir="/Users/lin/Desktop",
     authors="Xukun Lin",
     host="github.com",
-    julia=v"1.9",
+    julia=v"1.11",
     plugins=[
         Git(; ignore=["**/.DS_Store"], manifest=false, jl=false),
         GitHubActions(),

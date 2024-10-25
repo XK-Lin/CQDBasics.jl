@@ -1,5 +1,4 @@
-include("CQDBasics.jl")
-using .CQDBasics
+using CQDBasics
 
 cwd = pwd()
 for dir ∈ filter(isdir, readdir(cwd, join=true))
@@ -7,4 +6,4 @@ for dir ∈ filter(isdir, readdir(cwd, join=true))
     sort_folders(dir)
     get_subfolder_summary_tables(dir)
 end
-clean_folders(cwd)
+clean_folders(cwd, true)

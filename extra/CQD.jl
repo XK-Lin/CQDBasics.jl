@@ -1,11 +1,10 @@
-include("CQDBasics.jl")
-using Alert, Dates, .CQDBasics
+using Alert, Dates, CQDBasics
 
 file_dir = pwd()
 
 # User Control
 start_time = now()
-experiment = Experiment("Alex 165")
+experiment = Experiment("Alex 156")
 simulation = Simulation(
     "BE", # type
     15, # number of atoms
@@ -19,10 +18,9 @@ simulation = Simulation(
     (1, 1), # Bₙ Bₑ ratio
     0, # kᵢ
     ("ABC", 1/16), # average method
-    "off", # θ cross detection
     "off", # sigmoid field
     "qm", # R2 comparison
-    ["simulation info", "flip plot", "flip probabilities"] # files to save
+    ["simulation info", "flip plot", "flip probabilities", "CQDBase.jl"] # files to save
 )
 raw_data, θₑ_plot, θₙ_plot, θₑθₙ_plot = simulate(experiment, simulation)
 results = Results(experiment, simulation, raw_data, θₑ_plot, θₙ_plot, θₑθₙ_plot)
