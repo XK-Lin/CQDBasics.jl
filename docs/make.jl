@@ -21,6 +21,6 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/XK-Lin/CQDBasics.jl",
-    versions="v0.1"
+    versions="v0.1",
     devbranch="main",
 )
