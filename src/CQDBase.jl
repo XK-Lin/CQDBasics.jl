@@ -1,14 +1,10 @@
-#=
-CQDBase.jl
-
+"""
 This module defines important structures and functions for CQD simulations. These can be used for different approaches, including the original CQD simulation with BE, or the Wigner d Majorana simulation with BE.
 Author: Xukun Lin
 Update: 10/25/2024
 
 Required packages: "Pkg", "LinearAlgebra", "Dates", "Statistics", "Logging", "StatsBase", "DifferentialEquations", "ODEInterfaceDiffEq", "Plots", "DataStructures", "DataFrames", "CSV", "LaTeXStrings", "JSON3", "Rotations", "WignerD".
-Required constants: μ₀, γₑ, γₙ, δθ.
-=#
-
+"""
 module CQDBase
 
 using Pkg, LinearAlgebra, Dates, Statistics, Logging, StatsBase, DifferentialEquations, ODEInterfaceDiffEq, Plots, DataStructures, DataFrames, CSV, LaTeXStrings, JSON3, Rotations, WignerD
@@ -209,29 +205,29 @@ struct Simulation
 end
 
 """
-    sample_atom_once(simulation::Simulation)
+    sample_atom_once(BₙBₑ_ratio::Tuple{<:Real, <:Real}, BₙBₑ_strength::String, initial_μₑ::Union{String, Real}, initial_μₙ::Union{String, Vector{<:Real}})
 
-Sample one atom based on the simulation parameters.
+Sample one atom based on the input parameters.
 """
-function sample_atom_once(simulation::Simulation)
-    Bₙ, Bₑ = simulation.BₙBₑ_ratio .* ((simulation.BₙBₑ_strength == "CQD") ? (1.1884177310293015e-5, 0.05580626719338844) : (12.36e-3, 58.12))
-    θₑ₀ = (simulation.initial_μₑ == "up" || simulation.initial_μₑ == -1/2) ? δθ / 2 : π - δθ / 2
+function sample_atom_once(BₙBₑ_ratio::Tuple{<:Real, <:Real}, BₙBₑ_strength::String, initial_μₑ::Union{String, Real}, initial_μₙ::Union{String, Vector{<:Real}})
+    Bₙ, Bₑ = BₙBₑ_ratio .* ((BₙBₑ_strength == "CQD") ? (1.1884177310293015e-5, 0.05580626719338844) : (12.36e-3, 58.12))
+    θₑ₀ = (initial_μₑ == "up" || initial_μₑ == -1/2) ? δθ / 2 : π - δθ / 2
     ϕₑ₀ = 0.0
     mᵢ = NaN
-    if simulation.initial_μₙ == "HS"
+    if initial_μₙ == "HS"
         θₙ₀, ϕₙ₀ = 2asin(rand()^(1/4)), 2π * rand()
-    elseif simulation.initial_μₙ == "IHS"
+    elseif initial_μₙ == "IHS"
         θₙ₀, ϕₙ₀ = π - 2asin(rand()^(1/4)), 2π * rand()
-    elseif simulation.initial_μₙ == "Iso"
+    elseif initial_μₙ == "Iso"
         θₙ₀, ϕₙ₀ = 2asin(sqrt(rand())), 2π * rand()
     else
-        if simulation.initial_μₙ isa Vector{<:Real}
-            mᵢs = length(simulation.initial_μₙ) == 2 ? [-3/2, 3/2] : [-3/2, -1/2, 1/2, 3/2]
-            weights = simulation.initial_μₙ
+        if initial_μₙ isa Vector{<:Real}
+            mᵢs = length(initial_μₙ) == 2 ? [-3/2, 3/2] : [-3/2, -1/2, 1/2, 3/2]
+            weights = initial_μₙ
         else
             dists = Dict("HS 2" => ([-3/2, 3/2], [2/3, 1/3]), "IHS 2" => ([-3/2, 3/2], [1/3, 2/3]), "Iso 2" => ([-3/2, 3/2], [0.5, 0.5]), "HS 4" => ([-3/2, -1/2, 1/2, 3/2], [0.4, 0.3, 0.2, 0.1]), "IHS 4" => ([-3/2, -1/2, 1/2, 3/2], [0.1, 0.2, 0.3, 0.4]), "Iso 4" => ([-3/2, -1/2, 1/2, 3/2], [0.25, 0.25, 0.25, 0.25]))
-            mᵢs = dists[simulation.initial_μₙ][1]
-            weights = dists[simulation.initial_μₙ][2]
+            mᵢs = dists[initial_μₙ][1]
+            weights = dists[initial_μₙ][2]
         end
         mᵢ = sample(mᵢs, ProbabilityWeights(weights))
         Bₙ /= abs(mᵢ) == 1/2 ? 3 : 1
@@ -241,9 +237,27 @@ function sample_atom_once(simulation::Simulation)
 end
 
 """
+    sample_atom_once(simulation::Simulation)
+
+Sample one atom based on the simulation parameters.
+"""
+function sample_atom_once(simulation::Simulation)
+    return sample_atom_once(simulation.BₙBₑ_ratio, simulation.BₙBₑ_strength, simulation.initial_μₑ, simulation.initial_μₙ)
+end
+
+"""
+    sample_atoms(BₙBₑ_ratio::Tuple{<:Real, <:Real}, BₙBₑ_strength::String, initial_μₑ::Union{String, Real}, initial_μₙ::Union{String, Vector{<:Real}}, atom_number::Int64)
+
+Sample atoms according to the input parameters and the number of atoms.
+"""
+function sample_atoms(BₙBₑ_ratio::Tuple{<:Real, <:Real}, BₙBₑ_strength::String, initial_μₑ::Union{String, Real}, initial_μₙ::Union{String, Vector{<:Real}}, atom_number::Int64)
+    return [sample_atom_once(BₙBₑ_ratio, BₙBₑ_strength, initial_μₑ, initial_μₙ) for _ ∈ 1:atom_number]
+end
+
+"""
     sample_atoms(simulation::Simulation)
 
-Sample atoms according to the predefined number of atoms.
+Sample atoms according to the simulation parameters.
 """
 function sample_atoms(simulation::Simulation)
     return [sample_atom_once(simulation) for _ ∈ 1:simulation.atom_number]
@@ -261,65 +275,43 @@ function transform_vectors(vectors::Union{Vector{<:Vector{<:Real}}, Vector{<:Rea
 end
 
 """
-    get_external_magnetic_fields(t::Real, current::Real, experiment::Experiment, simulation::Simulation)
+    get_external_magnetic_fields(position::Union{Real, Tuple{<:Real, <:Real}}, current::Real, zₐ::Real, Bᵣ::Vector{<:Real}, magnetic_field_computation_method::String, sigmoid_field::Union{String, Tuple{<:Real, <:Real}})
 
-Calculate the external magnetic field components `Bx`, `By`, `Bz` at a given time `t` and return a tuple.
+Calculate the external magnetic field components `Bx`, `By`, `Bz` at a given position `position` and return a tuple. `position` may be a tuple of the form `(time, speed)`, `(velocity, speed)`, or a real number `y`.
 
 # Notes
 - +y is right, +z is up, +x is out of page.
 - Due to a different definition of the sign of current, the expressions have an extra minus sign.
 """
-function get_external_magnetic_fields(t::Real, current::Real, experiment::Experiment, simulation::Simulation)
-    y = t * experiment.v
-    Bx = experiment.Bᵣ[1]
-    if simulation.magnetic_field_computation_method == "quadrupole"
+function get_external_magnetic_fields(position::Union{Real, Tuple{<:Real, <:Real}}, current::Real, zₐ::Real, Bᵣ::Vector{<:Real}, magnetic_field_computation_method::String, sigmoid_field::Union{String, Tuple{<:Real, <:Real}})
+    y = prod(position)
+    Bx = Bᵣ[1]
+    if magnetic_field_computation_method == "quadrupole"
         current_factor = -current * μ₀ / (2π)
-        inv_Bᵣ_sq_sum = 1 / (experiment.Bᵣ[2]^2 + experiment.Bᵣ[3]^2)
-        y_NP = current_factor * experiment.Bᵣ[3] * inv_Bᵣ_sq_sum
-        z_NP = -experiment.zₐ - current_factor * experiment.Bᵣ[2] * inv_Bᵣ_sq_sum
+        inv_Bᵣ_sq_sum = 1 / (Bᵣ[2]^2 + Bᵣ[3]^2)
+        y_NP = current_factor * Bᵣ[3] * inv_Bᵣ_sq_sum
+        z_NP = -zₐ - current_factor * Bᵣ[2] * inv_Bᵣ_sq_sum
         G = 2π / (μ₀ * (-current))
-        Bᵣ2_Bᵣ3 = 2 * experiment.Bᵣ[2] * experiment.Bᵣ[3]
-        Bᵣ3_sq_minus_Bᵣ2_sq = experiment.Bᵣ[3]^2 - experiment.Bᵣ[2]^2
+        Bᵣ2_Bᵣ3 = 2 * Bᵣ[2] * Bᵣ[3]
+        Bᵣ3_sq_minus_Bᵣ2_sq = Bᵣ[3]^2 - Bᵣ[2]^2
         By = G * (Bᵣ2_Bᵣ3 * (y - y_NP) - Bᵣ3_sq_minus_Bᵣ2_sq * z_NP)
         Bz = G * (Bᵣ2_Bᵣ3 * z_NP + Bᵣ3_sq_minus_Bᵣ2_sq * (y - y_NP))
     else
-        G = μ₀ * (-current) / (2π * (experiment.zₐ^2 + y^2))
-        By = G * experiment.zₐ + experiment.Bᵣ[2]
-        Bz = -G * y + experiment.Bᵣ[3]
+        G = μ₀ * (-current) / (2π * (zₐ^2 + y^2))
+        By = G * zₐ + Bᵣ[2]
+        Bz = -G * y + Bᵣ[3]
     end
-    Bz += simulation.sigmoid_field == "off" ? 0.0 : simulation.sigmoid_field[1] * (1 / (1 + exp(-(y - simulation.sigmoid_field[2]) * 1e3)) + 1 / (1 + exp((y + simulation.sigmoid_field[2]) * 1e3)))
+    Bz += sigmoid_field == "off" ? 0.0 : sigmoid_field[1] * (1 / (1 + exp(-(y - sigmoid_field[2]) * 1e3)) + 1 / (1 + exp((y + sigmoid_field[2]) * 1e3)))
     return Bx, By, Bz
 end
 
 """
-    get_external_magnetic_fields(t::Real, current::Real, experiment::Experiment, magnetic_field_computation_method::String, sigmoid_field::Union{String, Tuple{<:Real, <:Real}})
+    get_external_magnetic_fields(t::Real, current::Real, experiment::Experiment, simulation::Simulation)
 
 Calculate the external magnetic field components `Bx`, `By`, `Bz` at a given time `t` and return a tuple.
-
-# Notes
-- +y is right, +z is up, +x is out of page.
-- Due to a different definition of the sign of current, the expressions have an extra minus sign.
 """
-function get_external_magnetic_fields(t::Real, current::Real, experiment::Experiment, magnetic_field_computation_method::String, sigmoid_field::Union{String, Tuple{<:Real, <:Real}})
-    y = t * experiment.v
-    Bx = experiment.Bᵣ[1]
-    if magnetic_field_computation_method == "quadrupole"
-        current_factor = -current * μ₀ / (2π)
-        inv_Bᵣ_sq_sum = 1 / (experiment.Bᵣ[2]^2 + experiment.Bᵣ[3]^2)
-        y_NP = current_factor * experiment.Bᵣ[3] * inv_Bᵣ_sq_sum
-        z_NP = -experiment.zₐ - current_factor * experiment.Bᵣ[2] * inv_Bᵣ_sq_sum
-        G = 2π / (μ₀ * (-current))
-        Bᵣ2_Bᵣ3 = 2 * experiment.Bᵣ[2] * experiment.Bᵣ[3]
-        Bᵣ3_sq_minus_Bᵣ2_sq = experiment.Bᵣ[3]^2 - experiment.Bᵣ[2]^2
-        By = G * (Bᵣ2_Bᵣ3 * (y - y_NP) - Bᵣ3_sq_minus_Bᵣ2_sq * z_NP)
-        Bz = G * (Bᵣ2_Bᵣ3 * z_NP + Bᵣ3_sq_minus_Bᵣ2_sq * (y - y_NP))
-    else
-        G = μ₀ * (-current) / (2π * (experiment.zₐ^2 + y^2))
-        By = G * experiment.zₐ + experiment.Bᵣ[2]
-        Bz = -G * y + experiment.Bᵣ[3]
-    end
-    Bz += sigmoid_field == "off" ? 0.0 : sigmoid_field[1] * (1 / (1 + exp(-(y - sigmoid_field[2]) * 1e3)) + 1 / (1 + exp((y + sigmoid_field[2]) * 1e3)))
-    return Bx, By, Bz
+function get_external_magnetic_fields(t::Real, current::Real, experiment::Experiment, simulation::Simulation)
+    return get_external_magnetic_fields((t, experiment.v), current, experiment.zₐ, experiment.Bᵣ, simulation.magnetic_field_computation_method, simulation.sigmoid_field)
 end
 
 """
@@ -395,16 +387,18 @@ function transform_angles(θ::Union{Real, Vector{<:Real}}, ϕ::Union{Real, Vecto
 end
 
 """
-    apply_branching(θₑs::Union{Real, Vector{<:Real}}, θₙs::Union{Real, Vector{<:Real}}, ϕₑs::Union{Real, Vector{<:Real}}, ϕₙs::Union{Real, Vector{<:Real}}, mᵢ::Real, simulation::Simulation)
+    apply_branching(θₑs::Union{Real, Vector{<:Real}}, θₙs::Union{Real, Vector{<:Real}}, ϕₑs::Union{Real, Vector{<:Real}}, ϕₙs::Union{Real, Vector{<:Real}}, mᵢ::Real, type::String, initial_μₑ::Union{String, Real}, initial_μₙ::Union{String, Vector{<:Real}}, branching_condition::String)
 
-Apply the branching conditions.
+Apply the branching conditions for one atom. The angles may be vectors of the same size, but the angles must belong to the same atom, possibily obtained at different time points.
+
+mᵢ is used if and only if `type="WM"`.
 """
-function apply_branching(θₑs::Union{Real, Vector{<:Real}}, θₙs::Union{Real, Vector{<:Real}}, ϕₑs::Union{Real, Vector{<:Real}}, ϕₙs::Union{Real, Vector{<:Real}}, mᵢ::Real, simulation::Simulation)
+function apply_branching(θₑs::Union{Real, Vector{<:Real}}, θₙs::Union{Real, Vector{<:Real}}, ϕₑs::Union{Real, Vector{<:Real}}, ϕₙs::Union{Real, Vector{<:Real}}, mᵢ::Real, type::String, initial_μₑ::Union{String, Real}, initial_μₙ::Union{String, Vector{<:Real}}, branching_condition::String)
     all(x -> 0 <= x <= π, θₑs) || throw(ArgumentError("θₑs must be between 0 and π."))
     all(x -> 0 <= x <= π, θₙs) || throw(ArgumentError("θₙs must be between 0 and π."))
-    initial_μₑ_is_up = simulation.initial_μₑ == "up" || simulation.initial_μₑ == -1/2
-    if simulation.type == "BE"
-        if simulation.branching_condition == "B₀ dominant"
+    initial_μₑ_is_up = initial_μₑ == "up" || initial_μₑ == -1/2
+    if type == "BE"
+        if branching_condition == "B₀ dominant"
             return initial_μₑ_is_up ? (θₑs .> θₙs) : (θₑs .< θₙs)
         else
             μₑ_unit_vectors = transform_vectors([sin.(θₑs) .* cos.(ϕₑs), sin.(θₑs) .* sin.(ϕₑs), cos.(θₑs)])
@@ -415,13 +409,13 @@ function apply_branching(θₑs::Union{Real, Vector{<:Real}}, θₙs::Union{Real
             return initial_μₑ_is_up ? (θₑBs .> θₑₙs) : (θₑBs .< θₑₙs)
         end
     else
-        j, mᵢi, pool = (simulation.initial_μₙ ∈ ("HS 2", "IHS 2", "Iso 2") || (simulation.initial_μₙ isa Vector{<:Real}) && length(simulation.initial_μₙ) == 2) ? (1/2, mᵢ / 3, [-3/2, 3/2]) : (3/2, mᵢ, [-3/2, -1/2, 1/2, 3/2])
+        j, mᵢi, pool = (initial_μₙ ∈ ("HS 2", "IHS 2", "Iso 2") || (initial_μₙ isa Vector{<:Real}) && length(initial_μₙ) == 2) ? (1/2, mᵢ / 3, [-3/2, 3/2]) : (3/2, mᵢ, [-3/2, -1/2, 1/2, 3/2])
         CCQ_weights = [[WignerD.wignerdjmn(j, mᵢi, k, θₙs[l])^2 for k ∈ -j:j] for l ∈ eachindex(θₙs)]
         mᵢfs = [sample(pool, ProbabilityWeights(CCQ_weights[l])) for l ∈ eachindex(CCQ_weights)]
         if length(mᵢfs) == 1
             mᵢfs = mᵢfs[1]
         end
-        if simulation.branching_condition == "B₀ dominant"
+        if branching_condition == "B₀ dominant"
             return initial_μₑ_is_up ? mᵢfs .> 0 : mᵢfs .< 0
         else
             θₙsₚ = ifelse.(mᵢfs .> 0, δθ, π - δθ)
@@ -445,17 +439,35 @@ function apply_branching(θₑs::Union{Real, Vector{<:Real}}, θₙs::Union{Real
 end
 
 """
-    is_flipped(angles::Union{Vector{<:Real}, Vector{<:Vector{<:Real}}}, mᵢ::Real, current::Real, experiment::Experiment, simulation::Simulation)
+    apply_branching(θₑs::Union{Real, Vector{<:Real}}, θₙs::Union{Real, Vector{<:Real}}, ϕₑs::Union{Real, Vector{<:Real}}, ϕₙs::Union{Real, Vector{<:Real}}, mᵢ::Real, simulation::Simulation)
 
-Determine whether an atom has flipped based on its angles, magnetic field computation method, and the branching condition.
+Apply the branching conditions based on the simulation parameters.
 """
-function is_flipped(angles::Union{Vector{<:Real}, Vector{<:Vector{<:Real}}}, mᵢ::Real, current::Real, experiment::Experiment, simulation::Simulation)
+function apply_branching(θₑs::Union{Real, Vector{<:Real}}, θₙs::Union{Real, Vector{<:Real}}, ϕₑs::Union{Real, Vector{<:Real}}, ϕₙs::Union{Real, Vector{<:Real}}, mᵢ::Real, simulation::Simulation)
+    return apply_branching(θₑs, θₙs, ϕₑs, ϕₙs, mᵢ, simulation.type, simulation.initial_μₑ, simulation.initial_μₙ, simulation.branching_condition)
+end
+
+"""
+    is_flipped(angles::Union{Vector{<:Real}, Vector{<:Vector{<:Real}}}, mᵢ::Real, B_start::Tuple{<:Real, <:Real, <:Real}, B_end::Tuple{<:Real, <:Real, <:Real}, type::String, initial_μₑ::Union{String, Real}, initial_μₙ::Union{String, Vector{<:Real}}, branching_condition::String)
+
+Determine whether an atom has flipped based on the input parameters. The result can be a vector, which is for only one atom but at different time points.
+"""
+function is_flipped(angles::Union{Vector{<:Real}, Vector{<:Vector{<:Real}}}, mᵢ::Real, B_start::Tuple{<:Real, <:Real, <:Real}, B_end::Tuple{<:Real, <:Real, <:Real}, type::String, initial_μₑ::Union{String, Real}, initial_μₙ::Union{String, Vector{<:Real}}, branching_condition::String)
     θₑfs, θₙfs, ϕₑfs, ϕₙfs = transform_vectors(angles)
-    (B_start, B_end) = get_external_magnetic_fields_at_ends(current, experiment, simulation)
     B_unit_vectors_at_ends = collect.((B_start ./ norm(B_start), B_end ./ norm(B_end)))
     θₑfsf, ϕₑfsf = transform_angles(θₑfs, ϕₑfs, B_unit_vectors_at_ends[1], B_unit_vectors_at_ends[2])
     θₙfsf, ϕₙfsf = transform_angles(θₙfs, ϕₙfs, B_unit_vectors_at_ends[1], B_unit_vectors_at_ends[2])
-    return apply_branching(θₑfsf, θₙfsf, ϕₑfsf, ϕₙfsf, mᵢ, simulation)
+    return apply_branching(θₑfsf, θₙfsf, ϕₑfsf, ϕₙfsf, mᵢ, type, initial_μₑ, initial_μₙ, branching_condition)
+end
+
+"""
+    is_flipped(angles::Union{Vector{<:Real}, Vector{<:Vector{<:Real}}}, mᵢ::Real, current::Real, experiment::Experiment, simulation::Simulation)
+
+Determine whether an atom has flipped based on the simulation parameters.
+"""
+function is_flipped(angles::Union{Vector{<:Real}, Vector{<:Vector{<:Real}}}, mᵢ::Real, current::Real, experiment::Experiment, simulation::Simulation)
+    (B_start, B_end) = get_external_magnetic_fields_at_ends(current, experiment, simulation)
+    return is_flipped(angles, mᵢ, B_start, B_end, simulation.type, simulation.initial_μₑ, simulation.initial_μₙ, simulation.branching_condition)
 end
 
 """
@@ -690,7 +702,7 @@ function save_results(experiment::Experiment, simulation::Simulation, results::R
         "Bₙ Bₑ Ratio" => simulation.BₙBₑ_ratio,
         "kᵢ" => simulation.kᵢ,
         "Average Method" => simulation.average_method,
-        "θ Cross Detection" => simulation.θ_cross_detection,
+        # "θ Cross Detection" => simulation.θ_cross_detection,
         "Sigmoid Field" => simulation.sigmoid_field,
         "R2 Comparison" => simulation.R2_comparison,
         "Simulation Start Time" => Dates.format(start_time, "yyyy-mm-dd HH:MM:SS.sss"),

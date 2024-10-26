@@ -1,13 +1,10 @@
-#=
-CQDDataAnalysisBase.jl
-
+"""
 This module defines functions that analyze results from CQDBase simulations.
 Author: Xukun Lin
 Update: 10/25/2024
 
 Required packages: "JSON3", "Plots", "LaTeXStrings", "DataFrames", "XLSX".
-=#
-
+"""
 module CQDDataAnalysisBase
 
 using Statistics, JSON3, Plots, LaTeXStrings, DataFrames, XLSX
