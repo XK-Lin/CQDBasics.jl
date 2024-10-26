@@ -693,57 +693,57 @@ function save_results(experiment::Experiment, simulation::Simulation, results::R
     "θₑ θₙ plot" ∈ simulation.save_files ? savefig(results.θₑθₙ_plot, joinpath(folder_dir, "θeθn_Plot.svg")) : nothing
     "flip plot" ∈ simulation.save_files ? savefig(results.flip_plot, joinpath(folder_dir, "Flip_Plot.svg")) : nothing
     "CQDBase.jl" ∈ simulation.save_files ? cp(@__FILE__, joinpath(folder_dir, "CQDBase.jl")) : nothing
-    end_time = now()
-    metadata = OrderedDict(
-        "Experiment" => experiment.name,
-        "Simulation Type" => simulation.type,
-        "Number of Atoms" => simulation.atom_number,
-        "Magnetic Field Computation Method" => simulation.magnetic_field_computation_method,
-        "Initial μₑ [relative to local B_ext]" => simulation.initial_μₑ,
-        "Initial μₙ [relative to local B_ext]" => simulation.initial_μₙ,
-        "Differential Equations Solver" => simulation.solver,
-        "θₙ" => simulation.θₙ_is_fixed ? "fixed" : "vary",
-        "Branching Condition" => simulation.branching_condition,
-        "Bₙ Bₑ Strength" => simulation.BₙBₑ_strength,
-        "Bₙ Bₑ Ratio" => simulation.BₙBₑ_ratio,
-        "kᵢ" => simulation.kᵢ,
-        "Average Method" => simulation.average_method,
-        # "θ Cross Detection" => simulation.θ_cross_detection,
-        "Sigmoid Field" => simulation.sigmoid_field,
-        "R2 Comparison" => simulation.R2_comparison,
-        "Simulation Start Time" => Dates.format(start_time, "yyyy-mm-dd HH:MM:SS.sss"),
-        "Simulation End Time" => Dates.format(end_time, "yyyy-mm-dd HH:MM:SS.sss"),
-        "Simulation Run Time" => string(Dates.canonicalize(end_time - start_time)),
-        "Remnant Fields [T]" => experiment.Bᵣ,
-        "Atom Speed [m/s]" => experiment.v,
-        "zₐ [m]" => experiment.zₐ,
-        "Flight Path Length [mm]" => experiment.system_length * 1e3,
-        "Flight Time Range [μs]" => experiment.time_span .* 1e6,
-        "Wire Currents [A]" => experiment.currents,
-        "Experiment Flip Probabilities" => experiment.flip_probabilities,
-        "Experiment Flip Probabilities Standard Deviations" => replace(experiment.flip_probabilities_stds, NaN => nothing),
-        "QM Flip Probabilities" => experiment.qm_flip_probabilities,
-        "Simulation Flip Probabilities" => results.flip_probabilities,
-        "Simulation Flip Probabilities Standard Deviations" => replace(results.flip_probabilities_stds, NaN => nothing),
-        "R2" => results.R2,
-        "δθ" => δθ,
-        "Machine" => Sys.MACHINE,
-        "CPU" => Sys.cpu_info()[1].model,
-        "Total Memory [GB]" => Sys.total_memory() / 1024^3,
-        "Julia Version" => VERSION
-    )
     if "simulation info" ∈ simulation.save_files
+        end_time = now()
+        metadata = OrderedDict(
+            "Experiment" => experiment.name,
+            "Simulation Type" => simulation.type,
+            "Number of Atoms" => simulation.atom_number,
+            "Magnetic Field Computation Method" => simulation.magnetic_field_computation_method,
+            "Initial μₑ [relative to local B_ext]" => simulation.initial_μₑ,
+            "Initial μₙ [relative to local B_ext]" => simulation.initial_μₙ,
+            "Differential Equations Solver" => simulation.solver,
+            "θₙ" => simulation.θₙ_is_fixed ? "fixed" : "vary",
+            "Branching Condition" => simulation.branching_condition,
+            "Bₙ Bₑ Strength" => simulation.BₙBₑ_strength,
+            "Bₙ Bₑ Ratio" => simulation.BₙBₑ_ratio,
+            "kᵢ" => simulation.kᵢ,
+            "Average Method" => simulation.average_method,
+            # "θ Cross Detection" => simulation.θ_cross_detection,
+            "Sigmoid Field" => simulation.sigmoid_field,
+            "R2 Comparison" => simulation.R2_comparison,
+            "Simulation Start Time" => Dates.format(start_time, "yyyy-mm-dd HH:MM:SS.sss"),
+            "Simulation End Time" => Dates.format(end_time, "yyyy-mm-dd HH:MM:SS.sss"),
+            "Simulation Run Time" => string(Dates.canonicalize(end_time - start_time)),
+            "Remnant Fields [T]" => experiment.Bᵣ,
+            "Atom Speed [m/s]" => experiment.v,
+            "zₐ [m]" => experiment.zₐ,
+            "Flight Path Length [mm]" => experiment.system_length * 1e3,
+            "Flight Time Range [μs]" => experiment.time_span .* 1e6,
+            "Wire Currents [A]" => experiment.currents,
+            "Experiment Flip Probabilities" => experiment.flip_probabilities,
+            "Experiment Flip Probabilities Standard Deviations" => replace(experiment.flip_probabilities_stds, NaN => nothing),
+            "QM Flip Probabilities" => experiment.qm_flip_probabilities,
+            "Simulation Flip Probabilities" => results.flip_probabilities,
+            "Simulation Flip Probabilities Standard Deviations" => replace(results.flip_probabilities_stds, NaN => nothing),
+            "R2" => results.R2,
+            "δθ" => δθ,
+            "Machine" => Sys.MACHINE,
+            "CPU" => Sys.cpu_info()[1].model,
+            "Total Memory [GB]" => Sys.total_memory() / 1024^3,
+            "Julia Version" => VERSION
+        )
         open(joinpath(folder_dir, "Info.json"), "w") do f
             JSON3.pretty(f, JSON3.write(metadata))
             println(f)
         end
     end
-    pkg_info = Pkg.dependencies()
-    pkg_data = OrderedDict()
-    for (uuid, info) in pkg_info
-        pkg_data[info.name] = info.version
-    end
     if "package info" ∈ simulation.save_files
+        pkg_info = Pkg.dependencies()
+        pkg_data = OrderedDict()
+        for (uuid, info) in pkg_info
+            pkg_data[info.name] = info.version
+        end
         open(joinpath(folder_dir, "Pkg_Info.json"), "w") do f
             JSON3.pretty(f, JSON3.write(pkg_data))
             println(f)

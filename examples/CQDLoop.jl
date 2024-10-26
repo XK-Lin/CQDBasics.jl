@@ -4,7 +4,7 @@ experiment = Experiment("Alex 156")
 
 file_dir = pwd()
 
-atom_number = 10
+atom_number = 150
 field_type = "exact"
 initial_μₑ = "down"
 
@@ -41,7 +41,7 @@ for i ∈ eachindex(average_method_list)
                                 average_method_list[i], # average method
                                 sigmoid_field_list[m], # sigmoid field
                                 "qm", # R2 comparison
-                                ["simulation info", "flip plot", "flip probabilities"], # flies to save
+                                "simulation info" # flies to save
                             )
                             raw_data, θₑ_plot, θₙ_plot, θₑθₙ_plot = simulate(experiment, simulation, false)
                             results = Results(experiment, simulation, raw_data, θₑ_plot, θₙ_plot, θₑθₙ_plot)
