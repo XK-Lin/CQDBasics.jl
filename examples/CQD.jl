@@ -22,7 +22,7 @@ simulation = Simulation(
     "qm", # R2 comparison
     ["simulation info", "flip plot", "flip probabilities", "CQDBase.jl"] # files to save
 )
-raw_data, θₑ_plot, θₙ_plot, θₑθₙ_plot = simulate(experiment, simulation)
+raw_data, θₑ_plot, θₙ_plot, θₑθₙ_plot = simulate(experiment, simulation, true)
 results = Results(experiment, simulation, raw_data, θₑ_plot, θₙ_plot, θₑθₙ_plot)
 save_results(experiment, simulation, results, start_time, file_dir)
 # cp(@__FILE__, joinpath(file_dir, Dates.format(start_time, "yyyy-mm-dd_HH-MM-SS-sss"), "Code.jl"))

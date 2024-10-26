@@ -1,6 +1,8 @@
 """
 This module defines important structures and functions for CQD simulations. These can be used for different approaches, including the original CQD simulation with BE, or the Wigner d Majorana simulation with BE.
+
 Author: Xukun Lin
+
 Update: 10/25/2024
 
 Required packages: "Pkg", "LinearAlgebra", "Dates", "Statistics", "Logging", "StatsBase", "DifferentialEquations", "ODEInterfaceDiffEq", "Plots", "DataStructures", "DataFrames", "CSV", "LaTeXStrings", "JSON3", "Rotations", "WignerD".
@@ -553,11 +555,11 @@ function get_solver(name::String)
 end
 
 """
-    simulate(experiment::Experiment, simulation::Simulation)
+    simulate(experiment::Experiment, simulation::Simulation, show_time::Bool)
 
 Simulate the whole system.
 """
-function simulate(experiment::Experiment, simulation::Simulation)
+function simulate(experiment::Experiment, simulation::Simulation, show_time::Bool)
     if simulation.magnetic_field_computation_method == "quadrupole" && experiment.name ∈ ("FS Low \$z_a\$", "FS High \$z_a\$")
         error("Quadrupole is calculated for zero current. Simulation will be slow and unreliable.")
     end
@@ -566,13 +568,17 @@ function simulate(experiment::Experiment, simulation::Simulation)
     θₑ_plot, θₙ_plot, θₑθₙ_plot = plot(), plot(), plot()
     for i ∈ eachindex(experiment.currents)
         current_i = experiment.currents[i]
-        print("current=$i: ")
+        show_time ? print("current=$i: ") : nothing
         atoms = sample_atoms(simulation)
         mᵢs = transform_vectors(atoms)[end]
         u₀ = atoms[1][1:4]
         ode_prob = ODEProblem(CQD_LLG_equation!, u₀, experiment.time_span, (experiment, simulation, current_i, atoms[1][5], atoms[1][6]))
         ensemble_prob = EnsembleProblem(ode_prob, prob_func = (prob, i, repeat) -> remake(prob, u0 = atoms[i][1:4], p = (experiment, simulation, current_i, atoms[i][5], atoms[i][6])))
-        @time solution = solve(ensemble_prob, get_solver(simulation.solver), EnsembleDistributed(), trajectories=simulation.atom_number, reltol=1e-6, abstol=1e-6, dtmin=1e-30, force_dtmin=true, maxiters=1e14, saveat=2e-8, dt=1e-30)
+        if show_time
+            @time solution = solve(ensemble_prob, get_solver(simulation.solver), EnsembleDistributed(), trajectories=simulation.atom_number, reltol=1e-6, abstol=1e-6, dtmin=1e-30, force_dtmin=true, maxiters=1e14, saveat=2e-8, dt=1e-30)
+        else
+            solution = solve(ensemble_prob, get_solver(simulation.solver), EnsembleDistributed(), trajectories=simulation.atom_number, reltol=1e-6, abstol=1e-6, dtmin=1e-30, force_dtmin=true, maxiters=1e14, saveat=2e-8, dt=1e-30)
+        end
         for j ∈ 1:simulation.atom_number
             sol = solution[j]
             ϕₑf, ϕₙf = sol.u[end - 1][3], sol.u[end - 1][4]
