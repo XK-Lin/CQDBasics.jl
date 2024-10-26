@@ -684,16 +684,17 @@ end
 Save the results of the whole simulation.
 """
 function save_results(experiment::Experiment, simulation::Simulation, results::Results, start_time, file_dir)
+    save_files = simulation.save_files isa String ? [simulation.save_files] : simulation.save_files
     folder_dir = joinpath(file_dir, Dates.format(start_time, "yyyy-mm-dd_HH-MM-SS-sss"))
     isdir(folder_dir) || mkdir(folder_dir)
-    "raw data" ∈ simulation.save_files ? CSV.write(joinpath(folder_dir, "Raw_Data.csv"), DataFrame(results.raw_data, :auto)) : nothing
-    "flip probabilities" ∈ simulation.save_files ? CSV.write(joinpath(folder_dir, "Flip_Probabilities.csv"), DataFrame(results.flip_probabilities[:, :], :auto)) : nothing
-    "θₑ plot" ∈ simulation.save_files ? savefig(results.θₑ_plot, joinpath(folder_dir, "θe_Plot.svg")) : nothing
-    "θₙ plot" ∈ simulation.save_files ? savefig(results.θₙ_plot, joinpath(folder_dir, "θn_Plot.svg")) : nothing
-    "θₑ θₙ plot" ∈ simulation.save_files ? savefig(results.θₑθₙ_plot, joinpath(folder_dir, "θeθn_Plot.svg")) : nothing
-    "flip plot" ∈ simulation.save_files ? savefig(results.flip_plot, joinpath(folder_dir, "Flip_Plot.svg")) : nothing
-    "CQDBase.jl" ∈ simulation.save_files ? cp(@__FILE__, joinpath(folder_dir, "CQDBase.jl")) : nothing
-    if "simulation info" ∈ simulation.save_files
+    "raw data" ∈ save_files ? CSV.write(joinpath(folder_dir, "Raw_Data.csv"), DataFrame(results.raw_data, :auto)) : nothing
+    "flip probabilities" ∈ save_files ? CSV.write(joinpath(folder_dir, "Flip_Probabilities.csv"), DataFrame(results.flip_probabilities[:, :], :auto)) : nothing
+    "θₑ plot" ∈ save_files ? savefig(results.θₑ_plot, joinpath(folder_dir, "θe_Plot.svg")) : nothing
+    "θₙ plot" ∈ save_files ? savefig(results.θₙ_plot, joinpath(folder_dir, "θn_Plot.svg")) : nothing
+    "θₑ θₙ plot" ∈ save_files ? savefig(results.θₑθₙ_plot, joinpath(folder_dir, "θeθn_Plot.svg")) : nothing
+    "flip plot" ∈ save_files ? savefig(results.flip_plot, joinpath(folder_dir, "Flip_Plot.svg")) : nothing
+    "CQDBase.jl" ∈ save_files ? cp(@__FILE__, joinpath(folder_dir, "CQDBase.jl")) : nothing
+    if "simulation info" ∈ save_files
         end_time = now()
         metadata = OrderedDict(
             "Experiment" => experiment.name,
@@ -738,7 +739,7 @@ function save_results(experiment::Experiment, simulation::Simulation, results::R
             println(f)
         end
     end
-    if "package info" ∈ simulation.save_files
+    if "package info" ∈ save_files
         pkg_info = Pkg.dependencies()
         pkg_data = OrderedDict()
         for (uuid, info) in pkg_info
