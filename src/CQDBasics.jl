@@ -1,6 +1,8 @@
 """
 This module wraps CQDBase.jl, CQDDataAnalysisBase.jl, and QuantumMechanics.jl.
+
 Author: Xukun Lin
+
 Update: 10/25/2024
 
 Required package (in addition to those required by wrapped modules): "Reexport".
