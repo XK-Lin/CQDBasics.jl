@@ -10,7 +10,7 @@ kᵢ_list = [0, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4]
 θₙ_is_fixed_list = [true, false]
 branching_condition_list = ["B₀ dominant", "Bₑ dominant"]
 average_method_list = [("ABC", 1/16), ("BCA", 1/16), "off"]
-initial_μₙ_list = ["HS 2", "IHS 2", "Iso 2", "HS 4", "IHS 4", "Iso 4"]
+initial_μₙ_list = ["HS", "IHS", "Iso"]
 sigmoid_field_list = ["off", (0.1, 2e-2)]
 BₙBₑ_ratio_list = [(1.3, 1.3), (1.35, 1.35), (1.4, 1.4), (1.45, 1.45), (1.5, 1.5)]
 

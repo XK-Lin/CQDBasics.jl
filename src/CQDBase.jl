@@ -182,7 +182,7 @@ struct Simulation
         # (θ_cross_detection isa String && θ_cross_detection == "off") || (θ_cross_detection isa Tuple && θ_cross_detection[1] ∈ ("sign", "minabs") && θ_cross_detection[2] > 0 && ((θ_cross_detection[3] isa Real && θ_cross_detection[3] > 0) || (θ_cross_detection[3] isa String && θ_cross_detection[3] == "adaptive"))) || throw(ArgumentError("The θ cross detection is invalid. See help of `Simulation`."))
         (sigmoid_field isa String && sigmoid_field == "off") || (sigmoid_field isa Tuple{<:Real, <:Real} && sigmoid_field[2] >= 0) || throw(ArgumentError("The sigmoid field is invalid. See help of `Simulation`."))
         R2_comparison ∈ ("experiment", "qm") || throw(ArgumentError("The R2 comparison must be either experiment or qm."))
-        all(x -> x ∈ ("θₑ plot", "θₙ plot", "θₑ θₙ plot", "flip plot", "raw data", "flip probabilities", "CQDBase.jl", "simulation info", "package info"), save_files) || throw(ArgumentError("The files to save contain invalid names. See help of `Simulation`."))
+        all(x -> x ∈ ("θₑ plot", "θₙ plot", "θₑ θₙ plot", "flip plot", "raw data", "flip probabilities", "CQDBase.jl", "simulation info", "package info"), save_files isa String ? [save_files] : save_files) || throw(ArgumentError("The files to save contain invalid names. See help of `Simulation`."))
         if initial_μₙ isa Vector{<:Real}
             @warn "The initial μₙ ia a vector. The consistency of the initial conditions needs manual check."
         end
