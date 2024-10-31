@@ -275,7 +275,7 @@ function combine_excels(directory::String, sheet_name::String, column_for_averag
         df = DataFrame(XLSX.readtable(excel_file_path, sheet_name))
         append!(combined_df, df)
     end
-    grouped_df = groupby(combined_df, names(combined_df)[setdiff(1:ncol(combined_df), column_for_average)])
+    grouped_df = groupby(combined_df, names(combined_df)[setdiff(1 : ncol(combined_df), column_for_average)])
     header = names(combined_df)[column_for_average]
     combined_grouped_df = combine(grouped_df, header => mean => Symbol("Averaged " * header))
     sorted_combined_grouped_df = sort(combined_grouped_df, Symbol("Averaged " * header), rev=true)

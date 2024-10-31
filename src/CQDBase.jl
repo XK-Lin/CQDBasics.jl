@@ -3,7 +3,7 @@ This module defines important structures and functions for CQD simulations. Thes
 
 Author: Xukun Lin
 
-Update: 10/30/2024
+Update: 10/31/2024
 
 Required packages: "Pkg", "LinearAlgebra", "Dates", "Statistics", "Logging", "StatsBase", "DifferentialEquations", "ODEInterfaceDiffEq", "Plots", "DataStructures", "DataFrames", "CSV", "LaTeXStrings", "JSON3", "Rotations", "WignerD".
 """
@@ -742,7 +742,7 @@ function save_results(experiment::Experiment, simulation::Simulation, results::R
     if "package info" ∈ save_files
         pkg_info = Pkg.dependencies()
         pkg_data = OrderedDict()
-        for (uuid, info) in pkg_info
+        for (uuid, info) ∈ pkg_info
             pkg_data[info.name] = info.version
         end
         open(joinpath(folder_dir, "Pkg_Info.json"), "w") do f
