@@ -3,7 +3,7 @@ This module defines important structures and functions for CQD simulations. Thes
 
 Author: Xukun Lin
 
-Update: 10/25/2024
+Update: 10/30/2024
 
 Required packages: "Pkg", "LinearAlgebra", "Dates", "Statistics", "Logging", "StatsBase", "DifferentialEquations", "ODEInterfaceDiffEq", "Plots", "DataStructures", "DataFrames", "CSV", "LaTeXStrings", "JSON3", "Rotations", "WignerD".
 """
@@ -25,7 +25,7 @@ const δθ = 1e-6
 An `Experiment` represents the experiment to simulate.
 
 # Fields
-- `name::String`: The name of the experiment. Predefined experiment names are `"FS Low \$z_a\$"`, and `"FS High \$z_a\$"`, `"Alex 165"`, `"Alex 156"`, `"Alex 396"`, `"Alex 105"`. For predefined experiments, use `Experiment(name)`.
+- `name::String`: The name of the experiment.
 - `currents::Vector{<:Real}`: The wire currents.
 - `flip_probabilities::Vector{<:Real}`: The (mean) flip probabilities from the experiment.
 - `flip_probabilities_stds::Vector{<:Real}`: The standard deviations of the flip probabilities.
@@ -62,7 +62,7 @@ end
 """
     Experiment(name::String)
 
-Outer constructor for `Experiment` that takes a predefined experiment name.
+Outer constructor for `Experiment` that takes a predefined experiment name. Predefined experiment names are `"FS Low \$z_a\$"`, and `"FS High \$z_a\$"`, `"Alex 105"`, `"Alex 156"`, `"Alex 165"`, `"Alex 396 SP"`, and `"Alex 396 DP"`.
 """
 function Experiment(name::String)
     experiments = Dict(

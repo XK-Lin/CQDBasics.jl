@@ -2,9 +2,9 @@
 CurrentModule = CQDBasics
 ```
 
-# CQDBasics
+# CQDBasics.jl
 
-Documentation for [CQDBasics](https://github.com/XK-Lin/CQDBasics.jl).
+Documentation for [CQDBasics.jl](https://github.com/XK-Lin/CQDBasics.jl).
 
 ### Contents
 
@@ -22,7 +22,19 @@ julia> Pkg.add(url="https://github.com/XK-Lin/CQDBasics.jl")
 
 ### Examples
 
-Examples are in `/examples`.
+Examples are [here](https://github.com/XK-Lin/CQDBasics.jl/tree/main/examples). You may want to create the following directory layout.
+
+```
+Example/
+├── CQDDataAnalysis.jl
+├── Loop1/
+│   ├── CQDLoop.jl
+│   └── ...
+├── Loop2/
+│   ├── CQDLoop.jl
+│   └── ...
+...
+```
 
 ### Functions
 

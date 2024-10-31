@@ -1,4 +1,4 @@
-using LinearAlgebra, Statistics, Plots, DifferentialEquations, ODEInterfaceDiffEq, WignerD, QuantumOptics
+using LinearAlgebra, Statistics, Plots, DifferentialEquations, ODEInterfaceDiffEq, QuantumOptics
 
 const ħ = 6.62607015e-34/(2π)
 const γₑ = -1.76085963023e11

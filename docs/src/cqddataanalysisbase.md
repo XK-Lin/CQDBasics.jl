@@ -2,7 +2,7 @@
 CurrentModule = CQDDataAnalysisBase
 ```
 
-# CQDDataAnalysisBase
+# CQDDataAnalysisBase.jl
 
 ```@autodocs
 Modules = [CQDDataAnalysisBase]

@@ -2,7 +2,7 @@
 CurrentModule = CQDBase
 ```
 
-# CQDBase
+# CQDBase.jl
 
 ```@autodocs
 Modules = [CQDBase]

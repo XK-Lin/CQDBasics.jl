@@ -3,7 +3,7 @@ This module defines functions that analyze results from CQDBase simulations.
 
 Author: Xukun Lin
 
-Update: 10/25/2024
+Update: 10/30/2024
 
 Required packages: "JSON3", "Plots", "LaTeXStrings", "DataFrames", "XLSX".
 """
@@ -241,8 +241,10 @@ Note that if you are using other functions from CQDDataAnalysisBase.jl in the fo
 """
 function clean_folders(directory::String, save_original::Bool)
     folder_paths = filter(isdir, readdir(directory, join=true))
-    original_data_folder_path = mkdir(joinpath(directory, "Original Data"))
-    save_original ? cp.(folder_paths, joinpath.(original_data_folder_path, basename.(folder_paths))) : nothing
+    if save_original
+        original_data_folder_path = mkdir(joinpath(directory, "Original Data"))
+        cp.(folder_paths, joinpath.(original_data_folder_path, basename.(folder_paths)))
+    end
     allowed_subfolders = Set(["1", "2", "3", "4"])
     for folder_path ∈ folder_paths
         subfolder_paths = filter(isdir, readdir(folder_path, join=true))
