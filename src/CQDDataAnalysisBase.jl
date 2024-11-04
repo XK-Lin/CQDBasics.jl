@@ -233,24 +233,23 @@ function get_subfolder_summary_tables(directory::String)
 end
 
 """
-    clean_folders(directory::String, save_original::Bool)
+    clean_folders(directory::String, save_original::Bool, subfolders_to_save::Vector{String})
 
 Clean the contents of folders in `directory` for faster upload / download.
 
 Note that if you are using other functions from CQDDataAnalysisBase.jl in the folder `dir`, then the input for this function should be `dirname(dir)`.
 """
-function clean_folders(directory::String, save_original::Bool)
+function clean_folders(directory::String, save_original::Bool, subfolders_to_save::Vector{String})
     folder_paths = filter(isdir, readdir(directory, join=true))
     if save_original
         original_data_folder_path = mkdir(joinpath(directory, "Original Data"))
         cp.(folder_paths, joinpath.(original_data_folder_path, basename.(folder_paths)))
     end
-    allowed_subfolders = Set(["1", "2", "3", "4"])
     for folder_path ∈ folder_paths
         subfolder_paths = filter(isdir, readdir(folder_path, join=true))
         for subfolder_path ∈ subfolder_paths
             subfolder_name = basename(subfolder_path)
-            if subfolder_name ∉ allowed_subfolders
+            if subfolder_name ∉ subfolders_to_save
                 rm(subfolder_path, recursive=true)
             end
         end
